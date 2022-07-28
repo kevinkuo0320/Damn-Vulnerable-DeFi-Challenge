@@ -40,6 +40,9 @@ describe('[Challenge] Unstoppable', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+
+        //token can be transferred without invoking the depositToken function
+        //so the assert() will fail 
         await this.token.transfer(this.pool.address, 1); 
     });
 

